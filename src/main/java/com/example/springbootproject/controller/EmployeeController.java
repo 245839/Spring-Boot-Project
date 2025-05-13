@@ -2,11 +2,16 @@ package com.example.springbootproject.controller;
 
 import com.example.springbootproject.entity.Employee;
 import com.example.springbootproject.repository.EmployeeRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.repository.query.Param;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Pageable;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,9 +36,29 @@ public class EmployeeController {
         return employeeRepository.findByFirstName(firstName);
     }
 
+    @GetMapping("/nameIC/{firstName}")
+    public List<Employee> getEmployeeByFirstNameIC(@PathVariable("firstName") String firstName) {
+        return employeeRepository.findByFirstNameIgnoreCase(firstName);
+    }
+
     @GetMapping("/surname/{lastName}")
     public List<Employee> getEmployeeByLastName(@PathVariable("lastName") String lastName) {
         return employeeRepository.findByLastName(lastName);
+    }
+
+    @GetMapping("/birthdate/{dateFrom}/{dateTo}")
+    public List<Employee> getEmployeeByBirthDate(@PathVariable("dateFrom") @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateFrom, @PathVariable("dateTo") @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateTo) {
+        return employeeRepository.findByBirthDateBetween(dateFrom, dateTo);
+    }
+
+    @GetMapping("/topN-by-birthdate/{dateFrom}/{dateTo}/{Nvalue}")
+    public List<Employee> getTopNByBirthDateBetween(
+            @PathVariable("dateFrom") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date dateFrom,
+            @PathVariable("dateTo") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date dateTo,
+            @PathVariable("Nvalue") int Nvalue
+    ) {
+        Pageable pageable = PageRequest.of(0, Nvalue);
+        return employeeRepository.findNByBirthDateBetween(dateFrom, dateTo, pageable);
     }
 
     @GetMapping("/prefix/{lastNamePrefix}")

@@ -2,6 +2,8 @@ package com.example.springbootproject.entity;
 
 import jakarta.persistence.*;
 
+import java.util.Date;
+
 @Entity
 @Table(name = "Employees")
 public class Employee {
@@ -15,6 +17,9 @@ public class Employee {
 
     @Column(name = "LastName")
     private String lastName;
+
+    @Column(name = "BirthDate")
+    private Date birthDate;
 
     public int getId() {
         return id;
@@ -38,6 +43,14 @@ public class Employee {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public Date getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(Date birthDate) {
+        this.birthDate = birthDate;
     }
 
     @Override

@@ -1,0 +1,20 @@
+---------------
+-- Zadanie 1 --
+---------------
+Co zawiera repozytorium: PagingAndSortingRepository<T, ID>
+Co zawiera repozytorium: JpaRepository<T, ID>
+
+Oba interfejsy dziedziczą z CrudRepository<T, ID> i zapewniają podstawowe operacje CRUD, oraz pracę z generykami, czyli obiektami z dowolnym typem encji i jej klucza głównego.
+
+PagingAndSortingRepository<T, ID> - rozszerzenie CrudRepository, które dodaje wsparcie dla paginacji i sortowania.
+
+JpaRepository<T, ID> - stanowi rozszerzenie PagingAndSortingRepository, które oferuje znacznie bogatszy zestaw metod i dodatkowe funkcje specyficzne dla JPA, m.in. zapis wielu encji, wypchnięcie danych do bazy bez konieczności stosowania transakcji, szybkie usuwanie wielu encji i pobieranie wielu encji po ich ID, oraz wiele więcej, w tym ich kombinacje.
+
+Porównanie powyższych interfejsów:
+1. Oba dziedziczą z CrudRepository
+2. Oba obsługują paginację i sortowanie
+3. JpaRepository obsługuje operacje masowe, czyli operacje na wielu encjach
+4. JpaRepository wspiera dodatkowe metody JPA, takie jak flush, saveAndFlush (wypychanie danych do bazy)
+5. JpaRepository posiada wsparcie dla EntityManager, które umożliwia łatwiejszą edycję encji
+
+Podsumowując, jeśli zależy nam tylko na prostej obsłudze sortowania i paginacji lepiej jest użyć  PagingAndSortingRepository, gdy jednak potrzebujemy więcej funkcjonalności lepiej jest skorzystać z bardziej rozbudowanego JpaRepository.
