@@ -2,9 +2,10 @@ package com.example.springbootproject.controller;
 
 import com.example.springbootproject.entity.Category;
 import com.example.springbootproject.repository.CategoryRepository;
+import com.example.springbootproject.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,40 +15,65 @@ import java.util.List;
 public class CategoryController {
 
     @Autowired
+    private CategoryService service;
+
+    @Autowired
     private CategoryRepository categoryRepository;
 
+    // GET /api/categories?page=0&size=5&sort=categoryName,asc
+    @GetMapping
+    public Page<Category> getAll(Pageable pageable) {
+        return service.findAll(pageable);
+    }
+
+    // GET /api/categories/search?name=beverage&page=0&size=5&sort=categoryName,asc
+    @GetMapping("/search")
+    public Page<Category> searchByName(
+            @RequestParam String name,
+            Pageable pageable) {
+        return service.findByName(name, pageable);
+    }
+
+    // GET /api/categories/all
     @GetMapping("/all")
-    public List<Category> getAllCategories() {
+    public List<Category> getAllUnpaged() {
         return categoryRepository.findAll();
     }
 
+    // GET /api/categories/get?name=Seafood
     @GetMapping("/get")
-    public Category getCategoryByName(@RequestParam String name) {
+    public Category getByName(@RequestParam String name) {
         return categoryRepository.findByCategoryName(name);
     }
 
-    @GetMapping("/add")
+    // POST /api/categories
+    @PostMapping
     public Category addCategory(@RequestParam String name) {
-        Category category = new Category();
-        category.setCategoryName(name);
-        return categoryRepository.save(category);
+        Category c = new Category();
+        c.setCategoryName(name);
+        return categoryRepository.save(c);
     }
 
-    @GetMapping("/update")
-    public Category updateCategory(@RequestParam Integer id, @RequestParam String name) {
-        return categoryRepository.findById(id).map(category -> {
-            category.setCategoryName(name);
-            return categoryRepository.save(category);
-        }).orElse(null);
+    // PUT /api/categories/{id}
+    @PutMapping("/{id}")
+    public Category updateCategory(
+            @PathVariable Integer id,
+            @RequestParam String name) {
+        return categoryRepository.findById(id)
+                .map(cat -> {
+                    cat.setCategoryName(name);
+                    return categoryRepository.save(cat);
+                })
+                .orElseThrow(() -> new RuntimeException("Category not found"));
     }
 
-    @GetMapping("/delete")
-    public String deleteCategory(@RequestParam Integer id) {
-        if (categoryRepository.existsById(id)) {
-            categoryRepository.deleteById(id);
-            return "Kategoria została usunięta.";
-        } else {
-            return "Kategoria o podanym ID nie istnieje.";
+    // DELETE /api/categories/{id}
+    @DeleteMapping("/{id}")
+    public String deleteCategory(@PathVariable Integer id) {
+        if (!categoryRepository.existsById(id)) {
+            return "Kategoria o ID " + id + " nie istnieje.";
         }
+        categoryRepository.deleteById(id);
+        return "Kategoria usunięta.";
     }
 }

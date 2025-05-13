@@ -2,99 +2,86 @@ package com.example.springbootproject.controller;
 
 import com.example.springbootproject.entity.Employee;
 import com.example.springbootproject.repository.EmployeeRepository;
-import org.springframework.web.bind.annotation.*;
+import com.example.springbootproject.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/employees")
+@RequestMapping("/employees")
 public class EmployeeController {
+
+    @Autowired
+    private EmployeeService service;
+
     @Autowired
     private EmployeeRepository employeeRepository;
 
+    // GET /api/employees?page=0&size=10&sort=lastName,asc
+    @GetMapping
+    public Page<Employee> getAll(Pageable pageable) {
+        return service.findAll(pageable);
+    }
+
+    // GET /api/employees/search?lastName=Smith&page=0&size=10&sort=firstName,desc
+    @GetMapping("/search")
+    public Page<Employee> searchByLastName(
+            @RequestParam String lastName,
+            Pageable pageable) {
+        return service.findByLastName(lastName, pageable);
+    }
+
+    // GET /api/employees/all
     @GetMapping("/all")
-    public List<Employee> getAllEmployees() {
+    public List<Employee> getAllUnpaged() {
         return employeeRepository.findAll();
     }
 
-    @GetMapping("/get")
-    public ResponseEntity<Employee> getEmployeeById(@RequestParam Integer id) {
+    // GET /api/employees/{id}
+    @GetMapping("/{id}")
+    public ResponseEntity<Employee> getById(@PathVariable Integer id) {
         return employeeRepository.findById(id)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/post")
+    // POST /api/employees
+    @PostMapping
     public Employee addEmployee(@RequestBody Employee employee) {
         return employeeRepository.save(employee);
     }
 
-    @PutMapping("/upd")
-    public Employee updateEmployee(@RequestBody Employee employee) {
-        return employeeRepository.save(employee);
-    }
-
-    @DeleteMapping("/del")
-    public void delEmployee(@RequestParam Integer index) {
-        employeeRepository.deleteById(index);
-    }
-
-    @GetMapping(value = "{employeeId}")
-    public Optional<Employee> getId (@PathVariable("employeeId") Integer employeeId) {
-        return employeeRepository.findById(employeeId);
-    }
-
-    @GetMapping("/add")
-    public Employee addEmployee(
-            @RequestParam String firstName,
-            @RequestParam String lastName
-    ) {
-        Employee employee = new Employee();
-        employee.setFirstName(firstName);
-        employee.setLastName(lastName);
-        return employeeRepository.save(employee);
-    }
-
-    @GetMapping("/update")
+    // PUT /api/employees/{id}
+    @PutMapping("/{id}")
     public ResponseEntity<Employee> updateEmployee(
-            @RequestParam Integer id,
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName
-    ) {
-        Optional<Employee> optional = employeeRepository.findById(id);
-        if (optional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        Employee employee = optional.get();
-        if (firstName != null) employee.setFirstName(firstName);
-        if (lastName != null) employee.setLastName(lastName);
-        return ResponseEntity.ok(employeeRepository.save(employee));
+            @PathVariable Integer id,
+            @RequestBody Employee updated) {
+        return employeeRepository.findById(id)
+                .map(emp -> {
+                    emp.setFirstName(updated.getFirstName());
+                    emp.setLastName(updated.getLastName());
+                    return ResponseEntity.ok(employeeRepository.save(emp));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/delete")
-    public ResponseEntity<String> deleteEmployee(@RequestParam Integer id) {
+    // DELETE /api/employees/{id}
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteEmployee(@PathVariable Integer id) {
         if (!employeeRepository.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pracownik o ID " + id + " nie istnieje.");
+            return ResponseEntity.notFound().build();
         }
         employeeRepository.deleteById(id);
         return ResponseEntity.ok("Pracownik usunięty.");
     }
 
+    // GET /api/employees/starts-with?prefix=Sm
     @GetMapping("/starts-with")
-    public List<Employee> getEmployeesWithLastNameStartingWith(@RequestParam String prefix) {
-        List<Employee> employees = employeeRepository.findByLastNameStartingWith(prefix);
-
-        System.out.println("==== PRACOWNICY Z PREFIXEM '" + prefix + "' ====");
-        for (Employee e : employees) {
-            System.out.println(e);
-        }
-
-        return employees;
+    public List<Employee> getStartsWith(@RequestParam String prefix) {
+        return employeeRepository.findByLastNameStartingWith(prefix);
     }
-
-
 }
