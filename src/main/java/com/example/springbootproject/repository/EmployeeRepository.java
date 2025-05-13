@@ -10,4 +10,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
     @Query("SELECT e FROM Employee e WHERE e.lastName LIKE :prefix%")
     List<Employee> findByLastNameStartingWith(String prefix);
 
+    List<Employee> findByFirstName(String firstName);
+
+    List<Employee> findByLastName(String lastName);
 }

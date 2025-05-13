@@ -12,7 +12,7 @@ public class Product {
     private Integer id;
 
     @Column(name = "ProductName")
-    private String name;
+    private String productName;
 
     @ManyToOne
     @JoinColumn(name = "CategoryID")
@@ -31,11 +31,11 @@ public class Product {
     }
 
     public String getName() {
-        return name;
+        return productName;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.productName = name;
     }
 
     public Category getCategory() {
