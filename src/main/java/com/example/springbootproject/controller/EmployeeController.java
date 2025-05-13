@@ -28,6 +28,26 @@ public class EmployeeController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
+    @PostMapping("/post")
+    public Employee addEmployee(@RequestBody Employee employee) {
+        return employeeRepository.save(employee);
+    }
+
+    @PutMapping("/upd")
+    public Employee updateEmployee(@RequestBody Employee employee) {
+        return employeeRepository.save(employee);
+    }
+
+    @DeleteMapping("/del")
+    public void delEmployee(@RequestParam Integer index) {
+        employeeRepository.deleteById(index);
+    }
+
+    @GetMapping(value = "{employeeId}")
+    public Optional<Employee> getId (@PathVariable("employeeId") Integer employeeId) {
+        return employeeRepository.findById(employeeId);
+    }
+
     @GetMapping("/add")
     public Employee addEmployee(
             @RequestParam String firstName,
