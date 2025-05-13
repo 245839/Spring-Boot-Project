@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Pageable;
+import com.example.springbootproject.service.EmployeeService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Date;
 import java.util.List;
@@ -19,7 +22,24 @@ import java.util.Optional;
 @RequestMapping("/employees")
 public class EmployeeController {
     @Autowired
+    private EmployeeService service;
+
+    @Autowired
     private EmployeeRepository employeeRepository;
+
+    // GET /api/employees?page=0&size=10&sort=lastName,asc
+    @GetMapping
+    public Page<Employee> getAll(Pageable pageable) {
+        return service.findAll(pageable);
+    }
+
+    // GET /api/employees/search?lastName=Smith&page=0&size=10&sort=firstName,desc
+    @GetMapping("/search")
+    public Page<Employee> searchByLastName(
+            @RequestParam String lastName,
+            Pageable pageable) {
+        return service.findByLastName(lastName, pageable);
+    }
 
     @GetMapping("/all")
     public List<Employee> getAllEmployees() {

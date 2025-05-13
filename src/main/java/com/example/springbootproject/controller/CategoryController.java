@@ -2,7 +2,10 @@ package com.example.springbootproject.controller;
 
 import com.example.springbootproject.entity.Category;
 import com.example.springbootproject.repository.CategoryRepository;
+import com.example.springbootproject.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,9 +13,25 @@ import java.util.List;
 @RestController
 @RequestMapping("/categories")
 public class CategoryController {
+    @Autowired
+    private CategoryService service;
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    // GET /api/categories?page=0&size=5&sort=categoryName,asc
+    @GetMapping
+    public Page<Category> getAll(Pageable pageable) {
+        return service.findAll(pageable);
+    }
+
+    // GET /api/categories/search?name=beverage&page=0&size=5&sort=categoryName,asc
+    @GetMapping("/search")
+    public Page<Category> searchByName(
+            @RequestParam String name,
+            Pageable pageable) {
+        return service.findByName(name, pageable);
+    }
 
     @GetMapping("/all")
     public List<Category> getAllCategories() {
